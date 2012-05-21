@@ -31,9 +31,12 @@ function AnagramGame(topic, nQuestions)
    {
       var buttons = _inputs.buttons;
 
-      $('#revealAnswerButton').click(_onClickRevealAnswerButton);
-      $('#nextClueButton'    ).click(_onClickNextClueButton    );
-      $('#submitAnswerButton').click(_onClickSubmitAnswerButton);
+      $('#revealAnswerButton').click(_onClickRevealAnswerButton           );
+      $('#nextClueButton'    ).click(_onClickNextClueButton               );
+      $('#submitAnswerButton').click(_onClickSubmitAnswerButton           );
+      $('#nextQuestionButton').click(function () {_getNextQuestionInfo();});
+
+      $(buttons.nextQuestion).hide();
 
       $.ajaxSetup
       (
@@ -45,21 +48,37 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
+      _getNextQuestionInfo();
+   };
+
+   // Private functions. ////////////////////////////////////////////////////////////////////////
+
+   /*
+    *
+    */
+   function _getNextQuestionInfo()
+   {
       $.ajax
       (
          {
             data: JSON.stringify
             (
                {
-                  header : 'get_unanswered_question_info',
-                  payload: {currentQuestionIndex: null}
+                  header : 'get_next_question_info',
+                  payload: {currentQuestionIndex: _state.currentQuestionIndex}
                }
             )
          }
       );
-   };
+   }
 
-   // Private functions. ////////////////////////////////////////////////////////////////////////
+   /*
+    *
+    */
+   function _displayEndGameSummary()
+   {
+      alert('Game over.  Final score ' + _state.currentScore + '/' + nQuestions);
+   }
 
    // Event listeners. ------------------------------------------------------------------------//
 
@@ -150,40 +169,64 @@ function AnagramGame(topic, nQuestions)
       {
          UTILS.validator.checkObject(msg, {header  : 'string', response: 'object'});
 
-         var header   = msg.header;
-         var response = msg.response;
+         var header    = msg.header;
+         var response  = msg.response;
+         var buttons   = _inputs.buttons;
+         var textboxes = _inputs.textboxes;
 
          switch (header)
          {
-          case 'get_unanswered_question_info':
+          case 'get_next_question_info':
             UTILS.validator.checkObject
-            (response, {clues: 'nonEmptyArray', questionIndex: 'nonNegativeInt'});
+            (response, {clues: 'nullOrNonEmptyArray', questionIndex: 'nullOrNonNegativeInt'});
+            if (response.questionIndex === null) {_displayEndGameSummary(); return;}
             var clues         = response.clues;
             var questionIndex = response.questionIndex;
-            $('#clueTd'      ).text(clues[0]                                            );
-            $('#clueNoTd'    ).text('Clue 1/'   + clues.length                          );
-            $('#questionNoTd').text('Question ' + (questionIndex + 1) + '/' + nQuestions);
-            _state.currentQuestionIndex           = questionIndex;
-            _state.currentClueIndex               = 0;
-            _state.currentClues                   = clues;
-            _inputs.buttons.nextClue.disabled     = (clues.length == 1);
-            _inputs.buttons.submitAnswer.disabled = false;
+            $('#clueTd'         ).text(clues[0]                                            );
+            $('#clueNoTd'       ).text('Clue 1/'   + clues.length                          );
+            $('#questionNoTd'   ).text('Question ' + (questionIndex + 1) + '/' + nQuestions);
+            $('#answerLabelSpan').text('Answer'                                            );
+            _state.currentQuestionIndex   = questionIndex;
+            _state.currentClueIndex       = 0;
+            _state.currentClues           = clues;
+            buttons.nextClue.disabled     = (clues.length == 1);
+            buttons.revealAnswer.disabled = false;
+            buttons.submitAnswer.disabled = false;
+            textboxes.answer.disabled     = false;
+            $(textboxes.answer    ).attr('value', '');
+            $(buttons.nextQuestion).hide();
+            $(buttons.submitAnswer).show();
             break;
 
           case 'give_up_and_get_answer':
             UTILS.validator.checkObject(response, {answer: 'string'});
-            $('#clueNoTd').text('Answer'       );
-            $('#clueTd'  ).text(response.answer);
-            _inputs.buttons.submitAnswer.disabled = true;
-            _inputs.buttons.nextClue.disabled     = true;
+            $('#answerLabelSpan').text('No answer given');
+            $('#clueNoTd'       ).text('Answer'         );
+            $('#clueTd'         ).text(response.answer  );
+            $('#scoreTd'        ).text
+            ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
+            buttons.nextClue.disabled     = true;
+            buttons.revealAnswer.disabled = true;
+            buttons.submitAnswer.disabled = true;
+            textboxes.answer.disabled     = true;
+            $(buttons.nextQuestion).show();
+            $(buttons.submitAnswer).hide();
             break;
 
           case 'submit_answer':
             UTILS.validator.checkObject(response, {answer: 'string', boolCorrect: 'bool'});
-            _inputs.buttons.submitAnswer.disabled = true;
-            _inputs.buttons.nextClue.disabled     = true;
-            $('#clueNoTd').text((response.boolCorrect)? 'Correct': 'Wrong');
-            $('#clueTd'  ).text(response.answer);
+            _state.currentScore += (response.boolCorrect)? 1: 0;
+            $('#answerLabelSpan').text((response.boolCorrect)? 'Correct!': 'Wrong!');
+            $('#clueNoTd'       ).text('Answer'                                    );
+            $('#clueTd'         ).text(response.answer                             );
+            $('#scoreTd'        ).text
+            ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
+            buttons.nextClue.disabled     = true;
+            buttons.revealAnswer.disabled = true;
+            buttons.submitAnswer.disabled = true;
+            textboxes.answer.disabled     = true;
+            $(buttons.nextQuestion).show();
+            $(buttons.submitAnswer).hide();
             break;
 
           default:
@@ -204,11 +247,12 @@ function AnagramGame(topic, nQuestions)
       {
          revealAnswer: INPUT({type: 'button', id: 'revealAnswerButton', value: 'Reveal Answer'}),
          nextClue    : INPUT({type: 'button', id: 'nextClueButton'    , value: 'Next Clue'    }),
-         submitAnswer: INPUT({type: 'button', id: 'submitAnswerButton', value: 'Submit Answer'})
+         submitAnswer: INPUT({type: 'button', id: 'submitAnswerButton', value: 'Submit Answer'}),
+         nextQuestion: INPUT({type: 'button', id: 'nextQuestionButton', value: 'Continue'     })
       },
       textboxes:
       {
-         answer: INPUT({type: 'text'})
+         answer: INPUT({type: 'text', id: 'answerTextbox'})
       }
    };
 
@@ -218,23 +262,41 @@ function AnagramGame(topic, nQuestions)
       {
          main: TABLE
          (
+            {id: 'anagramGameTable'},
             TBODY
             (
-               TR(TH({colspan: 3}, H1('Anagram Game'))),
-               TR(TH({colspan: 3}, H2(topic         ))),
                TR
                (
-                  TD({style: 'width: 33%', 'class': 'alignL', id: 'questionNoTd'}),
-                  TD({style: 'width: 34%'                                       }),
-                  TD({style: 'width: 33%', 'class': 'alignR', id: 'clueNoTd'    })
+                  {'class': 'instructionsTr'},
+                  TD
+                  (
+                     {colSpan: '3'},
+                     'Rearrange the letters in the phrase below to form the', BR(),
+                     ' name of a ' + topic
+                  )
                ),
-               TR(TD({colspan: '3', 'class': 'alignC', id: 'clueTd'}                          )),
-               TR(TD({colspan: '3', 'class': 'alignC'              }, _inputs.textboxes.answer)),
                TR
                (
-                  TD(_inputs.buttons.nextClue    ),
-                  TD(_inputs.buttons.submitAnswer),
-                  TD(_inputs.buttons.revealAnswer)
+                  {'class': 'questionNoTr'},
+                  TD({style: 'width: 33%', id: 'questionNoTd'}),
+                  TD({style: 'width: 34%', id: 'scoreTd'     }),
+                  TD({style: 'width: 33%', id: 'clueNoTd'    })
+               ),
+               TR({'class': 'clueTr'}, TD({colSpan: '3', id: 'clueTd'})),
+               TR
+               (
+                  {'class': 'answerTr'},
+                  TD
+                  (
+                     {colSpan: '3'}, SPAN({id: 'answerLabelSpan'}), BR(), _inputs.textboxes.answer
+                  )
+               ),
+               TR
+               (
+                  {'class': 'buttonsTr'},
+                  TD(_inputs.buttons.nextClue                                  ),
+                  TD(_inputs.buttons.submitAnswer, _inputs.buttons.nextQuestion),
+                  TD(_inputs.buttons.revealAnswer                              )
                )
             )
          )
@@ -245,7 +307,8 @@ function AnagramGame(topic, nQuestions)
    {
       currentClues        : null,
       currentClueIndex    : null,
-      currentQuestionIndex: null
+      currentQuestionIndex: null,
+      currentScore        : 0
    };
 }
 

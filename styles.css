@@ -12,16 +12,65 @@
 *
 \**************************************************************************************************/
 
-input
+*
 {
-   width: 100%;
+   padding: 0;
+   margin: 0;
+}
+
+#linksDiv
+{
+   margin-bottom: 40px;
+   margin-top: 10px;
    text-align: center;
 }
 
-#clueTd
+#anagramGameTable
 {
-   font-size: xx-large;
-   padding: 20px;
+   width: 100%;
+}
+
+#anagramGameTable td
+{
+   text-align: center;
+}
+
+#anagramGameTable tr.instructionsTr td
+{
+   padding-bottom: 130px;
+}
+
+#anagramGameTable tr.clueTr td
+{
+   font-size: 70px;
+   padding-bottom: 150px;
+   padding-top: 70px;
+}
+
+#anagramGameTable tr.answerTr input
+{
+   font-size: 16px;
+   height: 30px;
+   margin-top: 10px;
+   width: 250px;
+}
+
+#anagramGameTable tr.answerTr td input
+{
+   text-align: center
+}
+
+#anagramGameTable tr.buttonsTr td
+{
+   height: 70px;
+}
+
+#anagramGameTable tr.buttonsTr td input
+{
+   font-size: 16px;
+   height: 30px;
+   margin: 50px;
+   width: 200px;
 }
 
 /*******************************************END*OF*FILE********************************************/

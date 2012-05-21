@@ -33,8 +33,8 @@ try
 
    switch ($header)
    {
-    case 'get_unanswered_question_info':
-      $response = getResponseForGetUnansweredQuestionInfoQuery($payload);
+    case 'get_next_question_info':
+      $response = getResponseForGetNextQuestionInfoQuery($payload);
       break;
 
     case 'give_up_and_get_answer':
@@ -61,7 +61,7 @@ catch (Exception $e)
 /*
  *
  */
-function getResponseForGetUnansweredQuestionInfoQuery($payload)
+function getResponseForGetNextQuestionInfoQuery($payload)
 {
    UtilsValidator::checkArray($payload, array('currentQuestionIndex' => 'nullOrNonNegativeInt'));
    extract($payload);
@@ -72,21 +72,25 @@ function getResponseForGetUnansweredQuestionInfoQuery($payload)
    $nQuestions        = count($answersInQuestionOrder);
    $nextQuestionIndex =
    (
-      ($currentQuestionIndex === null)? 0: ($currentQuestionIndex + 1) % $nQuestions
+      ($currentQuestionIndex === null)? 0:
+      (
+         ($currentQuestionIndex + 1 < $nQuestions)? $currentQuestionIndex + 1: null
+      )
    );
 
-   $nextAnswer = $answersInQuestionOrder[$nextQuestionIndex];
-
-   while (array_key_exists($nextAnswer, $answerSubmittedByAnswer))
-   {
-      $nextQuestionIndex = ($nextQuestionIndex + 1) % $nQuestions;
-      $nextAnswer        = $answersInQuestionOrder[$nextQuestionIndex];
-   }
-
-   return array
+   return
    (
-      'questionIndex' => $nextQuestionIndex,
-      'clues'         => $anagramsByAnswer[$nextAnswer]
+      ($nextQuestionIndex === null)?
+      array
+      (
+         'questionIndex' => null,
+         'clues'         => null
+      ):
+      array
+      (
+         'questionIndex' => $nextQuestionIndex,
+         'clues'         => $anagramsByAnswer[$answersInQuestionOrder[$nextQuestionIndex]]
+      )
    );
 }
 
@@ -124,7 +128,11 @@ function getResponseForSubmitAnswerQuery($payload)
    $answer = $answersInQuestionOrder[$currentQuestionIndex];
    $_SESSION['anagramGame']['answerSubmittedByAnswer'][$answer] = $submittedAnswer;
 
-   return array('answer' => $answer, 'boolCorrect' => ($answer == $submittedAnswer));
+   return array
+   (
+      'answer'      => $answer,
+      'boolCorrect' => (strtolower($answer) == strtolower($submittedAnswer))
+   );
 }
 
 /*

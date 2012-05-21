@@ -45,8 +45,8 @@ try
    $anchorHtmlStrings = array
    (
       // Order important.
-      "<a href='http://www.tomcdonnell.net'>Back to tomcdonnell.net</a>"                   ,
       "<a href='http://www.tomcdonnell.net/small_apps/anagram_checker'>Anagram Checker</a>",
+      "<strong>Anagram Game</strong>",
       "<a href='http://www.tomcdonnell.net/small_apps/anagram_finder'>Anagram Finder</a>"
    );
 }
@@ -85,17 +85,21 @@ UtilsHtml::echoHtmlScriptAndLinkTagsForJsAndCssFiles
 ?>
  </head>
  <body>
+  <div id='linksDiv'>
+   <a href='http://www.tomcdonnell.net'>Back to tomcdonnell.net</a>
+   <br/><br/>
 <?php
-echo '  ', implode(" |\n  ", $anchorHtmlStrings), "\n";
+echo '   ', implode(" |\n   ", $anchorHtmlStrings), "\n";
 UtilsHtmlForm::echoArrayAsHiddenInputs
 (
    array
    (
       'topic'      => $topic,
       'nQuestions' => count($answersInQuestionOrder)
-   ), '  '
+   ), '   '
 );
 ?>
+  </div>
  </body>
 </html>
 <?php
