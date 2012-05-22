@@ -215,6 +215,7 @@ function AnagramGame(topic, nQuestions)
 
           case 'submit_answer':
             UTILS.validator.checkObject(response, {answer: 'string', boolCorrect: 'bool'});
+            _state.currentScore += (response.boolCorrect)? 1: 0;
             $('#answerLabelSpan'  ).text((response.boolCorrect)? 'Correct!': 'Wrong!');
             $('#clueNoTd'         ).text('Answer'                                    );
             $('#clueTd'           ).text(response.answer                             );
@@ -222,7 +223,6 @@ function AnagramGame(topic, nQuestions)
             ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
             $(buttons.nextQuestion).show();
             $(buttons.submitAnswer).hide();
-            _state.currentScore += (response.boolCorrect)? 1: 0;
             buttons.nextClue.disabled     = true;
             buttons.revealAnswer.disabled = true;
             buttons.submitAnswer.disabled = true;
