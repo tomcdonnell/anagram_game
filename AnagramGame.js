@@ -17,8 +17,7 @@
  */
 function AnagramGame(topic, nQuestions)
 {
-   var f = 'AnagramGame()';
-   UTILS.checkArgs(f, arguments, [String, 'positiveInt']);
+   UTILS.checkArgs('AnagramGame()', arguments, [String, 'positiveInt']);
 
    // Priviliged functions. /////////////////////////////////////////////////////////////////////
 
@@ -181,41 +180,27 @@ function AnagramGame(topic, nQuestions)
             _state.currentClueIndex     = 0;
             _state.currentClues         = response.clues;
             _state.currentQuestionIndex = response.questionIndex;
-            var displayTextByElementId  =
-            {
-               answerLabelSpan: 'Answer'                         ,
-               clueNoTd       : 'Clue 1/' + response.clues.length,
-               clueTd         : response.clues[0]                ,
-               questionNoTd   : 'Question ' + (response.questionIndex + 1) + '/' + nQuestions
-            };
             break;
 
           case 'give_up_and_get_answer':
             UTILS.validator.checkObject(response, {answer: 'string'});
-            var displayTextByElementId =
-            {
-               answerLabelSpan: 'No answer given',
-               clueNoTd       : 'Answer'         ,
-               clueTd         : response.answer
-            };
+            _state.previousAnswer           = response.answer;
+            _state.boolPreviousGuessCorrect = false;
             break;
 
           case 'submit_answer':
             UTILS.validator.checkObject(response, {answer: 'string', boolCorrect: 'bool'});
-            _state.currentScore += (response.boolCorrect)? 1: 0;
-            var displayTextByElementId =
-            {
-               answerLabelSpan: (response.boolCorrect)? 'Correct!': 'Wrong!',
-               clueNoTd       : 'Answer'                                    ,
-               clueTd         : response.answer
-            };
+            _state.currentScore            += (response.boolCorrect)? 1: 0;
+            _state.previousAnswer           = response.answer;
+            _state.boolPreviousGuessCorrect = response.boolCorrect;
             break;
 
           default:
             throw 'Unknown header "' + header + '".';
          }
 
-         _updateDisplay(header, displayTextByElementId);
+         _updateDisplay(header);
+         _updateStateOfInputElements(header);
       }
       catch (e)
       {
@@ -223,29 +208,65 @@ function AnagramGame(topic, nQuestions)
       }
    }
 
+   // Other private functions. ----------------------------------------------------------------//
+
    /*
     * Display code goes here in order to separate from game logic.
     */
-   function _updateDisplay(previousAjaxHeader, displayTextByElementId)
+   function _updateDisplay(header)
    {
-      var buttons   = _inputs.buttons;
-      var textboxes = _inputs.textboxes;
-
-      if (previousAjaxHeader == 'get_next_question_info')
-      {
-         $(_inputs.textboxes.answer).attr('value', '');
-      }
+      var displayTextByElementId = UTILS.switchAssign
+      (
+         header,
+         {
+            get_next_question_info:
+            {
+               answerLabelSpan: 'Answer'                              ,
+               clueNoTd       : 'Clue 1/' + _state.currentClues.length,
+               clueTd         : _state.currentClues[0]                ,
+               questionNoTd   : 'Question ' + (_state.currentQuestionIndex + 1) + '/' + nQuestions
+            },
+            give_up_and_get_answer:
+            {
+               answerLabelSpan: 'No answer given',
+               clueNoTd       : 'Answer'         ,
+               clueTd         : _state.previousAnswer
+            },
+            submit_answer:
+            {
+               answerLabelSpan: (_state.boolPreviousGuessCorrect)? 'Correct!': 'Wrong!',
+               clueNoTd       : 'Answer'                                               ,
+               clueTd         : _state.previousAnswer
+            }
+         }
+      );
 
       for (var key in displayTextByElementId)
       {
          $('#' + key).text(displayTextByElementId[key]);
       }
 
-      switch (previousAjaxHeader)
+      if (header != 'get_next_question_info')
+      {
+         $('#scoreTd').text
+         ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
+      }
+   }
+
+   /*
+    *
+    */
+   function _updateStateOfInputElements(header)
+   {
+      var buttons   = _inputs.buttons;
+      var textboxes = _inputs.textboxes;
+
+      switch (header)
       {
        case 'get_next_question_info':
          $(buttons.nextQuestion).hide();
          $(buttons.submitAnswer).show();
+         $(textboxes.answer    ).attr('value', '');
          buttons.nextClue.disabled     = (_state.currentClues.length == 1);
          buttons.revealAnswer.disabled = false;
          buttons.submitAnswer.disabled = false;
@@ -266,7 +287,6 @@ function AnagramGame(topic, nQuestions)
          throw 'Unknown header "' + header + '".';
       }
 
-      $('#scoreTd').text('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
    }
 
    // Private variables. ////////////////////////////////////////////////////////////////////////
