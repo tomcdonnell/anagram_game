@@ -48,6 +48,14 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
+      $('#nextQuestionButton').click
+      (
+         function (ev)
+         {
+            _ajaxSend('get_next_question_info', {currentQuestionIndex:_state.currentQuestionIndex});
+         }
+      );
+
       $('#submitAnswerButton').click
       (
          function (ev)
@@ -60,14 +68,6 @@ function AnagramGame(topic, nQuestions)
                   submittedAnswer     : $(_inputs.textboxes.answer).val()
                }
             );
-         }
-      );
-
-      $('#nextQuestionButton').click
-      (
-         function (ev)
-         {
-            _ajaxSend('get_next_question_info', {currentQuestionIndex:_state.currentQuestionIndex});
          }
       );
 
