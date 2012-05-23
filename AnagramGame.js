@@ -28,12 +28,20 @@ function AnagramGame(topic, nQuestions)
     */
    this.init = function ()
    {
+      var getNextQuestionInfoFunction = function ()
+      {
+         _sendAjaxMessage
+         (
+            'get_next_question_info', {currentQuestionIndex: _state.currentQuestionIndex}
+         );
+      };
+
       var buttons = _inputs.buttons;
 
-      $('#revealAnswerButton').click(_onClickRevealAnswerButton           );
-      $('#nextClueButton'    ).click(_onClickNextClueButton               );
-      $('#submitAnswerButton').click(_onClickSubmitAnswerButton           );
-      $('#nextQuestionButton').click(function () {_getNextQuestionInfo();});
+      $('#revealAnswerButton').click(_onClickRevealAnswerButton                  );
+      $('#nextClueButton'    ).click(_onClickNextClueButton                      );
+      $('#submitAnswerButton').click(_onClickSubmitAnswerButton                  );
+      $('#nextQuestionButton').click(function () {getNextQuestionInfoFunction();});
 
       $(buttons.nextQuestion).hide();
 
@@ -47,59 +55,25 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      _getNextQuestionInfo();
+      getNextQuestionInfoFunction();
    };
 
    // Private functions. ////////////////////////////////////////////////////////////////////////
-
-   /*
-    *
-    */
-   function _getNextQuestionInfo()
-   {
-      $.ajax
-      (
-         {
-            data: JSON.stringify
-            (
-               {
-                  header : 'get_next_question_info',
-                  payload: {currentQuestionIndex: _state.currentQuestionIndex}
-               }
-            )
-         }
-      );
-   }
-
-   /*
-    *
-    */
-   function _displayEndGameSummary()
-   {
-      alert('Game over.  Final score ' + _state.currentScore + '/' + nQuestions);
-   }
 
    // Event listeners. ------------------------------------------------------------------------//
 
    /*
     *
     */
-   function _onClickRevealAnswerButton(ev)
+   function _onClickNextClueButton(ev)
    {
       try
       {
-         $.ajax
-         (
-            {
-               data: JSON.stringify
-               (
-                  {
-                     header : 'give_up_and_get_answer',
-                     payload: {currentQuestionIndex: _state.currentQuestionIndex}
-                  }
-               )
-            }
-         );
+         var nClues              = _state.currentClues.length;
+         _state.currentClueIndex = (_state.currentClueIndex + 1) % nClues;
+
+         $('#clueTd'  ).text(_state.currentClues[_state.currentClueIndex]          );
+         $('#clueNoTd').text('Clue ' + (_state.currentClueIndex + 1) + '/' + nClues);
       }
       catch (e)
       {
@@ -110,18 +84,14 @@ function AnagramGame(topic, nQuestions)
    /*
     *
     */
-   function _onClickNextClueButton(ev)
+   function _onClickRevealAnswerButton(ev)
    {
       try
       {
-         var currentClues     = _state.currentClues;
-         var nClues           = currentClues.length;
-         var currentClueIndex = (_state.currentClueIndex + 1) % nClues;
-
-         $('#clueTd'  ).text(currentClues[currentClueIndex]                 );
-         $('#clueNoTd').text('Clue ' + (currentClueIndex + 1) + '/' + nClues);
-
-         _state.currentClueIndex = currentClueIndex;
+         _sendAjaxMessage
+         (
+            'give_up_and_get_answer', {currentQuestionIndex: _state.currentQuestionIndex}
+         );
       }
       catch (e)
       {
@@ -136,20 +106,12 @@ function AnagramGame(topic, nQuestions)
    {
       try
       {
-         $.ajax
+         _sendAjaxMessage
          (
+            'submit_answer',
             {
-               data: JSON.stringify
-               (
-                  {
-                     header : 'submit_answer',
-                     payload:
-                     {
-                        currentQuestionIndex: _state.currentQuestionIndex,
-                        submittedAnswer     : $(_inputs.textboxes.answer).val()
-                     }
-                  }
-               )
+               currentQuestionIndex: _state.currentQuestionIndex,
+               submittedAnswer     : $(_inputs.textboxes.answer).val()
             }
          );
       }
@@ -287,6 +249,22 @@ function AnagramGame(topic, nQuestions)
          throw 'Unknown header "' + header + '".';
       }
 
+   }
+
+   /*
+    *
+    */
+   function _sendAjaxMessage(header, payload)
+   {
+      $.ajax({data: JSON.stringify({header: header, payload: payload})});
+   }
+
+   /*
+    *
+    */
+   function _displayEndGameSummary()
+   {
+      alert('Game over.  Final score ' + _state.currentScore + '/' + nQuestions);
    }
 
    // Private variables. ////////////////////////////////////////////////////////////////////////
