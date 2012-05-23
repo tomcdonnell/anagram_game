@@ -161,7 +161,7 @@ function AnagramGame(topic, nQuestions)
    }
 
    /*
-    *
+    * Game logic goes here.
     */
    function _receiveAjaxMessage(msg, XmlHttpRequest, ajaxOptions)
    {
@@ -169,10 +169,8 @@ function AnagramGame(topic, nQuestions)
       {
          UTILS.validator.checkObject(msg, {header: 'string', response: 'object'});
 
-         var buttons   = _inputs.buttons;
-         var textboxes = _inputs.textboxes;
-         var header    = msg.header;
-         var response  = msg.response;
+         var header   = msg.header;
+         var response = msg.response;
 
          switch (header)
          {
@@ -180,63 +178,95 @@ function AnagramGame(topic, nQuestions)
             UTILS.validator.checkObject
             (response, {clues: 'nullOrNonEmptyArray', questionIndex: 'nullOrNonNegativeInt'});
             if (response.questionIndex === null) {_displayEndGameSummary(); return;}
-            var clues         = response.clues;
-            var questionIndex = response.questionIndex;
-            $('#answerLabelSpan'  ).text('Answer'                                            );
-            $('#clueNoTd'         ).text('Clue 1/'   + clues.length                          );
-            $('#clueTd'           ).text(clues[0]                                            );
-            $('#questionNoTd'     ).text('Question ' + (questionIndex + 1) + '/' + nQuestions);
-            $(buttons.nextQuestion).hide();
-            $(buttons.submitAnswer).show();
-            $(textboxes.answer    ).attr('value', '');
-            _state.currentClueIndex       = 0;
-            _state.currentClues           = clues;
-            _state.currentQuestionIndex   = questionIndex;
-            buttons.nextClue.disabled     = (clues.length == 1);
-            buttons.revealAnswer.disabled = false;
-            buttons.submitAnswer.disabled = false;
-            textboxes.answer.disabled     = false;
+            _state.currentClueIndex     = 0;
+            _state.currentClues         = response.clues;
+            _state.currentQuestionIndex = response.questionIndex;
+            var displayTextByElementId  =
+            {
+               answerLabelSpan: 'Answer'                         ,
+               clueNoTd       : 'Clue 1/' + response.clues.length,
+               clueTd         : response.clues[0]                ,
+               questionNoTd   : 'Question ' + (response.questionIndex + 1) + '/' + nQuestions
+            };
             break;
 
           case 'give_up_and_get_answer':
             UTILS.validator.checkObject(response, {answer: 'string'});
-            $('#answerLabelSpan'  ).text('No answer given');
-            $('#clueNoTd'         ).text('Answer'         );
-            $('#clueTd'           ).text(response.answer  );
-            $('#scoreTd'          ).text
-            ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
-            $(buttons.nextQuestion).show();
-            $(buttons.submitAnswer).hide();
-            buttons.nextClue.disabled     = true;
-            buttons.revealAnswer.disabled = true;
-            buttons.submitAnswer.disabled = true;
-            textboxes.answer.disabled     = true;
+            var displayTextByElementId =
+            {
+               answerLabelSpan: 'No answer given',
+               clueNoTd       : 'Answer'         ,
+               clueTd         : response.answer
+            };
             break;
 
           case 'submit_answer':
             UTILS.validator.checkObject(response, {answer: 'string', boolCorrect: 'bool'});
             _state.currentScore += (response.boolCorrect)? 1: 0;
-            $('#answerLabelSpan'  ).text((response.boolCorrect)? 'Correct!': 'Wrong!');
-            $('#clueNoTd'         ).text('Answer'                                    );
-            $('#clueTd'           ).text(response.answer                             );
-            $('#scoreTd'          ).text
-            ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
-            $(buttons.nextQuestion).show();
-            $(buttons.submitAnswer).hide();
-            buttons.nextClue.disabled     = true;
-            buttons.revealAnswer.disabled = true;
-            buttons.submitAnswer.disabled = true;
-            textboxes.answer.disabled     = true;
+            var displayTextByElementId =
+            {
+               answerLabelSpan: (response.boolCorrect)? 'Correct!': 'Wrong!',
+               clueNoTd       : 'Answer'                                    ,
+               clueTd         : response.answer
+            };
             break;
 
           default:
             throw 'Unknown header "' + header + '".';
          }
+
+         _updateDisplay(header, displayTextByElementId);
       }
       catch (e)
       {
          console.debug(e);
       }
+   }
+
+   /*
+    * Display code goes here in order to separate from game logic.
+    */
+   function _updateDisplay(previousAjaxHeader, displayTextByElementId)
+   {
+      var buttons   = _inputs.buttons;
+      var textboxes = _inputs.textboxes;
+
+      if (previousAjaxHeader == 'get_next_question_info')
+      {
+         $(_inputs.textboxes.answer).attr('value', '');
+      }
+
+      for (var key in displayTextByElementId)
+      {
+         $('#' + key).text(displayTextByElementId[key]);
+      }
+
+      switch (previousAjaxHeader)
+      {
+       case 'get_next_question_info':
+         $(buttons.nextQuestion).hide();
+         $(buttons.submitAnswer).show();
+         buttons.nextClue.disabled     = (_state.currentClues.length == 1);
+         buttons.revealAnswer.disabled = false;
+         buttons.submitAnswer.disabled = false;
+         textboxes.answer.disabled     = false;
+         break;
+
+       case 'give_up_and_get_answer': // Fall through.
+       case 'submit_answer'         :
+         $(buttons.nextQuestion).show();
+         $(buttons.submitAnswer).hide();
+         buttons.nextClue.disabled     = true;
+         buttons.revealAnswer.disabled = true;
+         buttons.submitAnswer.disabled = true;
+         textboxes.answer.disabled     = true;
+         break;
+
+       default:
+         throw 'Unknown header "' + header + '".';
+      }
+
+      $('#scoreTd').text('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
    }
 
    // Private variables. ////////////////////////////////////////////////////////////////////////
