@@ -28,20 +28,50 @@ function AnagramGame(topic, nQuestions)
     */
    this.init = function ()
    {
-      var getNextQuestionInfoFunction = function ()
-      {
-         _sendAjaxMessage
-         (
-            'get_next_question_info', {currentQuestionIndex: _state.currentQuestionIndex}
-         );
-      };
-
       var buttons = _inputs.buttons;
 
-      $('#revealAnswerButton').click(_onClickRevealAnswerButton                  );
-      $('#nextClueButton'    ).click(_onClickNextClueButton                      );
-      $('#submitAnswerButton').click(_onClickSubmitAnswerButton                  );
-      $('#nextQuestionButton').click(function () {getNextQuestionInfoFunction();});
+      $('#nextClueButton').click
+      (
+         function (ev)
+         {
+            var nClues              = _state.currentClues.length;
+            _state.currentClueIndex = (_state.currentClueIndex + 1) % nClues;
+
+            $('#clueTd'  ).text(_state.currentClues[_state.currentClueIndex]          );
+            $('#clueNoTd').text('Clue ' + (_state.currentClueIndex + 1) + '/' + nClues);
+         }
+      );
+
+      $('#revealAnswerButton').click
+      (
+         function (ev)
+         {
+            _ajaxSend('give_up_and_get_answer', {currentQuestionIndex:_state.currentQuestionIndex});
+         }
+      );
+
+      $('#submitAnswerButton').click
+      (
+         function (ev)
+         {
+            _ajaxSend
+            (
+               'submit_answer',
+               {
+                  currentQuestionIndex: _state.currentQuestionIndex,
+                  submittedAnswer     : $(_inputs.textboxes.answer).val()
+               }
+            );
+         }
+      );
+
+      $('#nextQuestionButton').click
+      (
+         function (ev)
+         {
+            _ajaxSend('get_next_question_info', {currentQuestionIndex:_state.currentQuestionIndex});
+         }
+      );
 
       $(buttons.nextQuestion).hide();
 
@@ -55,71 +85,10 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      getNextQuestionInfoFunction();
+      $('#nextQuestionButton').click();
    };
 
    // Private functions. ////////////////////////////////////////////////////////////////////////
-
-   // Event listeners. ------------------------------------------------------------------------//
-
-   /*
-    *
-    */
-   function _onClickNextClueButton(ev)
-   {
-      try
-      {
-         var nClues              = _state.currentClues.length;
-         _state.currentClueIndex = (_state.currentClueIndex + 1) % nClues;
-
-         $('#clueTd'  ).text(_state.currentClues[_state.currentClueIndex]          );
-         $('#clueNoTd').text('Clue ' + (_state.currentClueIndex + 1) + '/' + nClues);
-      }
-      catch (e)
-      {
-         console.debug(e);
-      }
-   }
-
-   /*
-    *
-    */
-   function _onClickRevealAnswerButton(ev)
-   {
-      try
-      {
-         _sendAjaxMessage
-         (
-            'give_up_and_get_answer', {currentQuestionIndex: _state.currentQuestionIndex}
-         );
-      }
-      catch (e)
-      {
-         console.debug(e);
-      }
-   }
-
-   /*
-    *
-    */
-   function _onClickSubmitAnswerButton(ev)
-   {
-      try
-      {
-         _sendAjaxMessage
-         (
-            'submit_answer',
-            {
-               currentQuestionIndex: _state.currentQuestionIndex,
-               submittedAnswer     : $(_inputs.textboxes.answer).val()
-            }
-         );
-      }
-      catch (e)
-      {
-         console.debug(e);
-      }
-   }
 
    /*
     * Game logic goes here.
@@ -169,8 +138,6 @@ function AnagramGame(topic, nQuestions)
          console.debug(e);
       }
    }
-
-   // Other private functions. ----------------------------------------------------------------//
 
    /*
     * Display code goes here in order to separate from game logic.
@@ -254,7 +221,7 @@ function AnagramGame(topic, nQuestions)
    /*
     *
     */
-   function _sendAjaxMessage(header, payload)
+   function _ajaxSend(header, payload)
    {
       $.ajax({data: JSON.stringify({header: header, payload: payload})});
    }
