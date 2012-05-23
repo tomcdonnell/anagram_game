@@ -213,7 +213,6 @@ function AnagramGame(topic, nQuestions)
        default:
          throw 'Unknown header "' + header + '".';
       }
-
    }
 
    /*
