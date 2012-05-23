@@ -28,8 +28,6 @@ function AnagramGame(topic, nQuestions)
     */
    this.init = function ()
    {
-      var buttons = _inputs.buttons;
-
       $('#nextClueButton').click
       (
          function (ev)
@@ -73,7 +71,7 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      $(buttons.nextQuestion).hide();
+      $(_inputs.buttons.nextQuestion).hide();
 
       $.ajaxSetup
       (
