@@ -17,7 +17,8 @@
  */
 function AnagramGame(topic, nQuestions)
 {
-   UTILS.checkArgs('AnagramGame()', arguments, [String, 'positiveInt']);
+   var f = 'AnagramGame()';
+   UTILS.checkArgs(f, arguments, ['string', 'positiveInt']);
 
    // Priviliged functions. /////////////////////////////////////////////////////////////////////
 
@@ -28,19 +29,22 @@ function AnagramGame(topic, nQuestions)
     */
    this.init = function ()
    {
-      $('#nextClueButton').click
+      var f = 'AnagramGame.init()';
+      UTILS.checkArgs(f, arguments, []);
+
+      $('#next-clue-button').click
       (
          function (ev)
          {
             var nClues              = _state.currentClues.length;
             _state.currentClueIndex = (_state.currentClueIndex + 1) % nClues;
 
-            $('#clueTd'  ).text(_state.currentClues[_state.currentClueIndex]          );
-            $('#clueNoTd').text('Clue ' + (_state.currentClueIndex + 1) + '/' + nClues);
+            $('#clue-td'       ).text(_state.currentClues[_state.currentClueIndex]          );
+            $('#clue-number-td').text('Clue ' + (_state.currentClueIndex + 1) + '/' + nClues);
          }
       );
 
-      $('#revealAnswerButton').click
+      $('#reveal-answer-button').click
       (
          function (ev)
          {
@@ -48,7 +52,7 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      $('#nextQuestionButton').click
+      $('#next-question-button').click
       (
          function (ev)
          {
@@ -56,7 +60,7 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      $('#submitAnswerButton').click
+      $('#submit-answer-button').click
       (
          function (ev)
          {
@@ -83,7 +87,7 @@ function AnagramGame(topic, nQuestions)
          }
       );
 
-      $('#nextQuestionButton').click();
+      $('#next-question-button').click();
    };
 
    // Private functions. ////////////////////////////////////////////////////////////////////////
@@ -95,6 +99,8 @@ function AnagramGame(topic, nQuestions)
    {
       try
       {
+         var f = 'AnagramGame._receiveAjaxMessage()';
+         UTILS.checkArgs(f, arguments, ['object', 'string', 'object']);
          UTILS.validator.checkObject(msg, {header: 'string', response: 'object'});
 
          var header   = msg.header;
@@ -142,40 +148,44 @@ function AnagramGame(topic, nQuestions)
     */
    function _updateDisplay(header)
    {
-      var displayTextByElementId = UTILS.switchAssign
+      var f = 'AnagramGame._updateDisplay()';
+      UTILS.checkArgs(f, arguments, ['string']);
+
+      var displayTextByElementIdCamelCased = UTILS.switchAssign
       (
          header,
          {
             get_next_question_info:
             {
-               answerLabelSpan: 'Answer'                              ,
-               clueNoTd       : 'Clue 1/' + _state.currentClues.length,
-               clueTd         : _state.currentClues[0]                ,
-               questionNoTd   : 'Question ' + (_state.currentQuestionIndex + 1) + '/' + nQuestions
+               answerLabelSpan : 'Answer'                              ,
+               clueNumberTd    : 'Clue 1/' + _state.currentClues.length,
+               clueTd          : _state.currentClues[0]                ,
+               questionNumberTd: 'Question ' + (_state.currentQuestionIndex + 1) + '/' + nQuestions
             },
             give_up_and_get_answer:
             {
                answerLabelSpan: 'No answer given',
-               clueNoTd       : 'Answer'         ,
+               clueNumberTd   : 'Answer'         ,
                clueTd         : _state.previousAnswer
             },
             submit_answer:
             {
                answerLabelSpan: (_state.boolPreviousGuessCorrect)? 'Correct!': 'Wrong!',
-               clueNoTd       : 'Answer'                                               ,
+               clueNumberTd   : 'Answer'                                               ,
                clueTd         : _state.previousAnswer
             }
          }
       );
 
-      for (var key in displayTextByElementId)
+      for (var elementIdCamelCased in displayTextByElementIdCamelCased)
       {
-         $('#' + key).text(displayTextByElementId[key]);
+         var elementId = UTILS.string.convertCamelCaseToHyphenated(elementIdCamelCased);
+         $('#' + elementId).text(displayTextByElementIdCamelCased[elementIdCamelCased]);
       }
 
       if (header != 'get_next_question_info')
       {
-         $('#scoreTd').text
+         $('#score-td').text
          ('Score ' + _state.currentScore + '/' + (_state.currentQuestionIndex + 1));
       }
    }
@@ -185,6 +195,9 @@ function AnagramGame(topic, nQuestions)
     */
    function _updateStateOfInputElements(header)
    {
+      var f = 'AnagramGame._updateStateOfInputElements()';
+      UTILS.checkArgs(f, arguments, ['string']);
+
       var buttons   = _inputs.buttons;
       var textboxes = _inputs.textboxes;
 
@@ -220,6 +233,9 @@ function AnagramGame(topic, nQuestions)
     */
    function _ajaxSend(header, payload)
    {
+      var f = 'AnagramGame._ajaxSend()';
+      UTILS.checkArgs(f, arguments, ['string', 'object']);
+
       $.ajax({data: JSON.stringify({header: header, payload: payload})});
    }
 
@@ -228,6 +244,9 @@ function AnagramGame(topic, nQuestions)
     */
    function _displayEndGameSummary()
    {
+      var f = 'AnagramGame._displayEndGameSummary()';
+      UTILS.checkArgs(f, arguments, []);
+
       alert('Game over.  Final score ' + _state.currentScore + '/' + nQuestions);
    }
 
@@ -237,10 +256,10 @@ function AnagramGame(topic, nQuestions)
    {
       buttons:
       {
-         nextClue    : INPUT({type: 'button', id: 'nextClueButton'    , value: 'Next Clue'    }),
-         nextQuestion: INPUT({type: 'button', id: 'nextQuestionButton', value: 'Continue'     }),
-         revealAnswer: INPUT({type: 'button', id: 'revealAnswerButton', value: 'Reveal Answer'}),
-         submitAnswer: INPUT({type: 'button', id: 'submitAnswerButton', value: 'Submit Answer'})
+         nextClue    : INPUT({type: 'button', id: 'next-clue-button'    , value: 'Next Clue'    }),
+         nextQuestion: INPUT({type: 'button', id: 'next-question-button', value: 'Continue'     }),
+         revealAnswer: INPUT({type: 'button', id: 'reveal-answer-button', value: 'Reveal Answer'}),
+         submitAnswer: INPUT({type: 'button', id: 'submit-answer-button', value: 'Submit Answer'})
       },
       textboxes:
       {
@@ -270,11 +289,11 @@ function AnagramGame(topic, nQuestions)
                TR
                (
                   {'class': 'questionNoTr'},
-                  TD({style: 'width: 33%', id: 'questionNoTd'}),
-                  TD({style: 'width: 34%', id: 'scoreTd'     }),
-                  TD({style: 'width: 33%', id: 'clueNoTd'    })
+                  TD({style: 'width: 33%', id: 'question-number-td'}),
+                  TD({style: 'width: 34%', id: 'score-td'          }),
+                  TD({style: 'width: 33%', id: 'clue-number-td'    })
                ),
-               TR({'class': 'clueTr'}, TD({colSpan: '3', id: 'clueTd'})),
+               TR({'class': 'clueTr'}, TD({colSpan: '3', id: 'clue-td'})),
                TR
                (
                   {'class': 'answerTr'},

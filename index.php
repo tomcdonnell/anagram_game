@@ -77,6 +77,7 @@ UtilsHtml::echoHtmlScriptAndLinkTagsForJsAndCssFiles
       'lib_tom/js/contrib/utils/DomBuilder.js'          ,
       'lib_tom/js/utils/utils.js'                       ,
       'lib_tom/js/utils/utilsObject.js'                 ,
+      'lib_tom/js/utils/utilsString.js'                 ,
       'lib_tom/js/utils/utilsValidator.js'              ,
       'AnagramGame.js'                                  ,
       'index.js'
