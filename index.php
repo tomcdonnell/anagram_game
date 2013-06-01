@@ -15,7 +15,7 @@
 
 // Includes. ///////////////////////////////////////////////////////////////////////////////////////
 
-require_once dirname(__FILE__) . '/AnagramGameParser.php';
+require_once dirname(__FILE__) . '/php/AnagramGameParser.php';
 require_once dirname(__FILE__) . '/lib_tom/php/utils/UtilsHtml.php';
 require_once dirname(__FILE__) . '/lib_tom/php/utils/UtilsHtmlForm.php';
 
@@ -68,7 +68,7 @@ UtilsHtml::echoHtmlScriptAndLinkTagsForJsAndCssFiles
    array
    (
       'lib_tom/css/general_styles.css',
-      'styles.css'
+      'css/styles.css'
    ),
    array
    (
@@ -79,14 +79,15 @@ UtilsHtml::echoHtmlScriptAndLinkTagsForJsAndCssFiles
       'lib_tom/js/utils/utilsObject.js'                 ,
       'lib_tom/js/utils/utilsString.js'                 ,
       'lib_tom/js/utils/utilsValidator.js'              ,
-      'AnagramGame.js'                                  ,
-      'index.js'
+      'js/AnagramGame.js'                               ,
+      'js/AnagramGameTransitioner.js'                   ,
+      'js/index.js'
    )
 );
 ?>
  </head>
  <body>
-  <div id='linksDiv'>
+  <div id='links-div'>
    <a href='http://www.tomcdonnell.net'>Back to tomcdonnell.net</a>
    <br/><br/>
 <?php

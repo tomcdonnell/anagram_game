@@ -18,36 +18,46 @@
    margin: 0;
 }
 
-#linksDiv
+#links-div
 {
    margin-bottom: 40px;
    margin-top: 10px;
    text-align: center;
 }
 
-#anagramGameTable
+#anagram-game-table
 {
    width: 100%;
 }
 
-#anagramGameTable td
+#anagram-game-table td
 {
    text-align: center;
 }
 
-#anagramGameTable tr.instructionsTr td
+#anagram-game-table tr.instructions-tr td
 {
    padding-bottom: 130px;
 }
 
-#anagramGameTable tr.clueTr td
+#anagram-game-table tr.clue-tr td
 {
+   font-family: monospace;
    font-size: 70px;
    padding-bottom: 150px;
    padding-top: 70px;
 }
 
-#anagramGameTable tr.answerTr input
+#anagram-game-table tr.clue-tr #clue-td
+{
+   height: 100px;
+}
+
+#anagram-game-table tr.clue-tr #clue-td span
+{
+}
+
+#anagram-game-table tr.answer-tr input
 {
    font-size: 16px;
    height: 30px;
@@ -55,17 +65,17 @@
    width: 250px;
 }
 
-#anagramGameTable tr.answerTr td input
+#anagram-game-table tr.answer-tr td input
 {
    text-align: center
 }
 
-#anagramGameTable tr.buttonsTr td
+#anagram-game-table tr.buttons-tr td
 {
    height: 70px;
 }
 
-#anagramGameTable tr.buttonsTr td input
+#anagram-game-table tr.buttons-tr td input
 {
    font-size: 16px;
    height: 30px;
