@@ -32,7 +32,7 @@ try
    list($topic, $anagramsByAnswer) = AnagramGameParser::parseGameData($gameDataFilename);
 
    $answersInQuestionOrder = array_keys($anagramsByAnswer);
-   shuffle($answersInQuestionOrder);
+   //shuffle($answersInQuestionOrder);
 
    $_SESSION['anagramGame'] = array
    (
