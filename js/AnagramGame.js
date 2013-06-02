@@ -70,6 +70,16 @@ function AnagramGame(topic, nQuestions)
 
          switch (ev.target)
          {
+          case buttons.autoplayWithAnswers:
+            _state.autoplayMode = 'withAnswers';
+            _autoplayWithAnswers();
+            break;
+
+          case buttons.autoplayWithoutAnswers:
+            _state.autoplayMode = 'withoutAnswers';
+            _autoplayWithoutAnswers();
+            break;
+
           case buttons.nextClue:
             $('input[type="button"]').prop('disabled', true);
             var nClues      = _state.currentClues.length;
@@ -115,6 +125,99 @@ function AnagramGame(topic, nQuestions)
       {
          UTILS.printExceptionToConsole(f, e);
       }
+   }
+
+   /*
+    *
+    */
+   function _autoplayWithAnswers()
+   {
+      var f = 'AnagramGame._autoplayWithAnswers()';
+      UTILS.checkArgs(f, arguments, []);
+
+      var boolLastClueDisplayed = (_state.currentClueIndex == _state.currentClues.length - 1);
+      var boolAnswerDisplayed   = ($('#clue-number-td').html() == 'Answer');
+
+      window.setTimeout
+      (
+         function ()
+         {
+            try
+            {
+               var f = 'AnagramGame._autoplayWithAnswers() onTimeout()';
+               UTILS.checkArgs(f, arguments, []);
+
+               var buttons  = _inputs.buttons;
+               var clueTdJq = $('#clue-td');
+
+               if (boolAnswerDisplayed)
+               {
+                  clueTdJq.css('color', 'red');
+                  clueTdJq.html
+                  (
+                     (_state.currentQuestionIndex + 1 == nQuestions)? 'Game Over':
+                     'Question ' + (_state.currentQuestionIndex + 2)
+                  );
+                  window.setTimeout(function () {$(buttons.nextQuestion).click();}, 1000);
+               }
+               else
+               {
+                  $((boolLastClueDisplayed)? buttons.revealAnswer: buttons.nextClue).click();
+               }
+            }
+            catch (e)
+            {
+               UTILS.printExceptionToConsole(f, e);
+            }
+         },
+         ((boolAnswerDisplayed)? 1500: 300)
+      );
+   }
+
+   /*
+    *
+    */
+   function _autoplayWithoutAnswers()
+   {
+      var f = 'AnagramGame._autoplayWithoutAnswers()';
+      UTILS.checkArgs(f, arguments, []);
+
+      var boolLastClueDisplayed = (_state.currentClueIndex == _state.currentClues.length - 1);
+
+      window.setTimeout
+      (
+         function ()
+         {
+            try
+            {
+               var f = 'AnagramGame._autoplayWithAnswers() onTimeout()';
+               UTILS.checkArgs(f, arguments, []);
+
+               var buttons  = _inputs.buttons;
+               var clueTdJq = $('#clue-td');
+
+               if (boolLastClueDisplayed)
+               {
+                  clueTdJq.css('color', 'red');
+                  clueTdJq.html
+                  (
+                     (_state.currentQuestionIndex + 1 == nQuestions)? 'Game Over':
+                     'Question ' + (_state.currentQuestionIndex + 2)
+                  );
+                  window.setTimeout(function () {$(buttons.nextQuestion).click();}, 1000);
+               }
+               else
+               {
+                  $(buttons.nextClue).click();
+               }
+            }
+            catch (e)
+            {
+               UTILS.printExceptionToConsole(f, e);
+            }
+         },
+         2000
+      );
    }
 
    /*
@@ -252,6 +355,8 @@ function AnagramGame(topic, nQuestions)
 
       clueTdJq.html('');
 
+      $('#clue-td').css('color', (($('#clue-number-td').html() == 'Answer')? 'green': 'black'));
+
       for (var i = 0, len = displayText.length; i < len; ++i)
       {
          clueTdJq.append(SPAN(displayText[i]));
@@ -269,32 +374,46 @@ function AnagramGame(topic, nQuestions)
       var buttons   = _inputs.buttons;
       var textboxes = _inputs.textboxes;
 
-      switch (header)
+      if (_state.autoplayMode === null)
       {
-       case 'get_next_question_info':
-         $(buttons.nextQuestion).hide();
-         $(buttons.submitAnswer).show();
-         $(textboxes.answer    ).attr('value', '');
-         $(buttons.nextClue    ).prop('disabled', (_state.currentClues.length == 1));
-         $(buttons.nextQuestion).prop('disabled', false                            );
-         $(buttons.revealAnswer).prop('disabled', false                            );
-         $(buttons.submitAnswer).prop('disabled', false                            );
-         $(textboxes.answer    ).prop('disabled', false                            );
-         break;
+         $(buttons.autoplayWithoutAnswers).prop('disabled', false);
+         $(buttons.autoplayWithAnswers   ).prop('disabled', false);
+         $(buttons.nextQuestion          ).prop('disabled', false);
 
-       case 'give_up_and_get_answer': // Fall through.
-       case 'submit_answer'         :
-         $(buttons.nextQuestion).show();
-         $(buttons.submitAnswer).hide();
-         $(buttons.nextClue    ).prop('disabled', true );
-         $(buttons.nextQuestion).prop('disabled', false);
-         $(buttons.revealAnswer).prop('disabled', true );
-         $(buttons.submitAnswer).prop('disabled', true );
-         $(textboxes.answer    ).prop('disabled', true );
-         break;
+         switch (header)
+         {
+          case 'get_next_question_info':
+            $(buttons.nextQuestion).hide();
+            $(buttons.submitAnswer).show();
+            $(textboxes.answer    ).attr('value', '');
+            $(buttons.nextClue    ).prop('disabled', (_state.currentClues.length == 1));
+            $(buttons.revealAnswer).prop('disabled', false                            );
+            $(buttons.submitAnswer).prop('disabled', false                            );
+            $(textboxes.answer    ).prop('disabled', false                            );
+            break;
 
-       default:
-         throw 'Unknown header "' + header + '".';
+          case 'give_up_and_get_answer': // Fall through.
+          case 'submit_answer'         :
+            $(buttons.nextQuestion).show();
+            $(buttons.submitAnswer).hide();
+            $(buttons.nextClue    ).prop('disabled', true );
+            $(buttons.revealAnswer).prop('disabled', true );
+            $(buttons.submitAnswer).prop('disabled', true );
+            $(textboxes.answer    ).prop('disabled', true );
+            break;
+
+          default:
+            throw 'Unknown header "' + header + '".';
+         }
+      }
+      else
+      {
+         switch (_state.autoplayMode)
+         {
+          case 'withAnswers'   : _autoplayWithAnswers()   ; break;
+          case 'withoutAnswers': _autoplayWithoutAnswers(); break;
+          default: throw new Exception(f, 'Unknown autoplay mode "' + _state.autoplayMode + '".');
+         }
       }
    }
 
@@ -328,6 +447,14 @@ function AnagramGame(topic, nQuestions)
    {
       buttons:
       {
+         autoplayWithAnswers: INPUT
+         (
+            {type: 'button', id: 'autoplay-with-answers' , value: 'Autoplay with Answers'}
+         ),
+         autoplayWithoutAnswers: INPUT
+         (
+            {type: 'button', id: 'autoplay-without-answers' , value: 'Autoplay without Answers'}
+         ),
          nextClue    : INPUT({type: 'button', id: 'next-clue-button'    , value: 'Next Clue'    }),
          nextQuestion: INPUT({type: 'button', id: 'next-question-button', value: 'Continue'     }),
          revealAnswer: INPUT({type: 'button', id: 'reveal-answer-button', value: 'Reveal Answer'}),
@@ -355,7 +482,9 @@ function AnagramGame(topic, nQuestions)
                   (
                      {colSpan: '3'},
                      'Rearrange the letters in the phrase below to form the', BR(),
-                     ' name of a ' + topic
+                     ' name of a ' + topic, BR(), BR(),
+                     _inputs.buttons.autoplayWithoutAnswers,
+                     _inputs.buttons.autoplayWithAnswers
                   )
                ),
                TR
@@ -388,6 +517,7 @@ function AnagramGame(topic, nQuestions)
 
    var _state =
    {
+      autoplayMode        : null,
       currentClueIndex    : null,
       currentClues        : null,
       currentQuestionIndex: null,

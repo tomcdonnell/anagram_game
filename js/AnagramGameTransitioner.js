@@ -320,8 +320,8 @@ function AnagramGameTransitioner()
 
    // Private constants. ////////////////////////////////////////////////////////////////////////
 
-   var _N_FRAMES_PER_TRANSITION = 40;
-   var _TRANSITION_TIME_IN_MS   = 2000;
+   var _N_FRAMES_PER_TRANSITION = 20;
+   var _TRANSITION_TIME_IN_MS   = 1000;
 }
 
 /*******************************************END*OF*FILE********************************************/
