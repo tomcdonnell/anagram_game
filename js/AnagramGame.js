@@ -128,9 +128,8 @@ function AnagramGame(topic, nQuestions)
          UTILS.checkArgs(f, arguments, ['object', 'string', 'object']);
          UTILS.validator.checkObject(msg, {header: 'string', response: 'object'});
 
-         var header               = msg.header;
-         var response             = msg.response;
-         var boolSkipFinalActions = false;
+         var header   = msg.header;
+         var response = msg.response;
 
          switch (header)
          {
@@ -142,10 +141,14 @@ function AnagramGame(topic, nQuestions)
             _state.currentClues         = response.clues;
             _state.currentQuestionIndex = response.questionIndex;
             $('#clue-td').html('');
+            _updateDisplay(header);
+            _updateStateOfInputElements(header);
             break;
 
           case 'give_up_and_get_answer':
             UTILS.validator.checkObject(response, {answer: 'string'});
+            _state.previousAnswer           = response.answer;
+            _state.boolPreviousGuessCorrect = false;
             _anagramGameTransitioner.transitionAnagramElement
             (
                $('#clue-td')[0], response.answer, function ()
@@ -154,9 +157,6 @@ function AnagramGame(topic, nQuestions)
                   _updateStateOfInputElements(header);
                }
             );
-            _state.previousAnswer           = response.answer;
-            _state.boolPreviousGuessCorrect = false;
-            boolSkipFinalActions            = true;
             break;
 
           case 'submit_answer':
@@ -164,16 +164,18 @@ function AnagramGame(topic, nQuestions)
             _state.currentScore            += (response.boolCorrect)? 1: 0;
             _state.previousAnswer           = response.answer;
             _state.boolPreviousGuessCorrect = response.boolCorrect;
+            _anagramGameTransitioner.transitionAnagramElement
+            (
+               $('#clue-td')[0], response.answer, function ()
+               {
+                  _updateDisplay(header);
+                  _updateStateOfInputElements(header);
+               }
+            );
             break;
 
           default:
             throw 'Unknown header "' + header + '".';
-         }
-
-         if (!boolSkipFinalActions)
-         {
-            _updateDisplay(header);
-            _updateStateOfInputElements(header);
          }
       }
       catch (e)
