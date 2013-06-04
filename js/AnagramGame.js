@@ -301,7 +301,7 @@ function AnagramGame(topic, nQuestions)
          {
             get_next_question_info:
             {
-               answerLabelSpan : 'Answer'                              ,
+               answerLabelSpan : 'Type the answer below.'              ,
                clueNumberTd    : 'Clue 1/' + _state.currentClues.length,
                clueTd          : _state.currentClues[0]                ,
                questionNumberTd: 'Question ' + (_state.currentQuestionIndex + 1) + '/' + nQuestions
