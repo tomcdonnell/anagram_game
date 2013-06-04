@@ -5,9 +5,9 @@
 *
 * Filename: "AnagramGameParser.php"
 *
-* Project: Anagram Poem Checker.
+* Project: Anagram Game.
 *
-* Purpose: The main file for the project.
+* Purpose: Definition of the AnagramGameParser class.
 *
 * Author: Tom McDonnell 2012-05-19.
 *
