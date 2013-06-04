@@ -81,7 +81,7 @@ function AnagramGame(topic, nQuestions)
             break;
 
           case buttons.nextClue:
-            $('input[type="button"]').prop('disabled', true);
+            $('input').prop('disabled', true);
             var nClues      = _state.currentClues.length;
             var clueTdJq    = $('#clue-td');
             _state.currentClueIndex = (_state.currentClueIndex + 1) % nClues;
@@ -98,7 +98,7 @@ function AnagramGame(topic, nQuestions)
             break;
 
           case buttons.revealAnswer:
-            $('input[type="button"]').prop('disabled', true);
+            $('input').prop('disabled', true);
             _ajaxSend('give_up_and_get_answer', {currentQuestionIndex:_state.currentQuestionIndex});
             break;
 
