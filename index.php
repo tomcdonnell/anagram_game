@@ -45,9 +45,9 @@ try
    $anchorHtmlStrings = array
    (
       // Order important.
-      "<a href='http://www.tomcdonnell.net/small_apps/anagram_checker'>Anagram Checker</a>",
+      "<a href='http://www.tomcdonnell.net/submodules/anagram_checker'>Anagram Checker</a>",
       "<strong>Anagram Game</strong>",
-      "<a href='http://www.tomcdonnell.net/small_apps/anagram_finder'>Anagram Finder</a>"
+      "<a href='http://www.tomcdonnell.net/submodules/anagram_finder'>Anagram Finder</a>"
    );
 }
 catch (Exception $e)
