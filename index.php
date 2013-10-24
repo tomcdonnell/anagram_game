@@ -45,9 +45,9 @@ try
    $anchorHtmlStrings = array
    (
       // Order important.
-      "<a href='http://www.tomcdonnell.net/submodules/anagram_checker'>Anagram Checker</a>",
+      "<a href='../../submodules/anagram_checker'>Anagram Checker</a>",
       "<strong>Anagram Game</strong>",
-      "<a href='http://www.tomcdonnell.net/submodules/anagram_finder'>Anagram Finder</a>"
+      "<a href='../../submodules/anagram_finder'>Anagram Finder</a>"
    );
 }
 catch (Exception $e)
@@ -88,7 +88,7 @@ UtilsHtml::echoHtmlScriptAndLinkTagsForJsAndCssFiles
  </head>
  <body>
   <div id='links-div'>
-   <a href='http://www.tomcdonnell.net'>Back to tomcdonnell.net</a>
+   <a href='../../index.php'>Back to tomcdonnell.net</a>
    <br/><br/>
 <?php
 echo '   ', implode(" |\n   ", $anchorHtmlStrings), "\n";
